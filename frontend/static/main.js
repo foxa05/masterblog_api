@@ -14,6 +14,19 @@ function loadPosts() {
     // Retrieve the base URL from the input field and save it to local storage
     var baseUrl = document.getElementById('api-base-url').value;
     localStorage.setItem('apiBaseUrl', baseUrl);
+     data.forEach(post => {
+        const postDiv = document.createElement('div');
+        postDiv.className = 'post';
+        postDiv.innerHTML = `
+            <h2>${post.title}</h2>
+            <p>${post.content}</p>
+            <p>Author: ${post.author}</p>
+            <p>Date: ${post.date}</p>
+            <button onclick="deletePost(${post.id})">Delete</button>
+            <button onclick="likePost(${post.id})">Like</button>
+            <span id="likes-${post.id}">${post.likes || 0} Likes</span>`;
+        postContainer.appendChild(postDiv);
+    });
 
     // Use the Fetch API to send a GET request to the /posts endpoint
     fetch(baseUrl + '/posts')
@@ -35,6 +48,21 @@ function loadPosts() {
         .catch(error => console.error('Error:', error));  // If an error occurs, log it to the console
 }
 
+function likePost(postId) {
+    var baseUrl = document.getElementById('api-base-url').value;
+
+    // Use the Fetch API to send a PUT request to the specific post's endpoint for liking
+    fetch(baseUrl + `/posts/like/${postId}`, {
+        method: 'PUT'
+    })
+    .then(response => response.json())
+    .then(post => {
+        // Update the likes count displayed on the page
+        const likesSpan = document.getElementById(`likes-${post.id}`);
+        likesSpan.textContent = `${post.likes} Likes`;
+    })
+    .catch(error => console.error('Error:', error));
+}
 // Function to send a POST request to the API to add a new post
 function addPost() {
     // Retrieve the values from the input fields
